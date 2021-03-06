@@ -18,11 +18,13 @@ void printUsage()
 }
 
 
+void printMessage(std::string message)
+{
+    std::cout << message << std::endl;
+}
+
 int main(int argc, const char* argv[] )
 {
-
-    
-
     if(argc == 3)
     {
         
@@ -35,6 +37,7 @@ int main(int argc, const char* argv[] )
         }
         else if(command.compare("run") == 0)
         {
+            tlist.itsAMatch = [] (std::string msg) {printMessage(msg);};
             tlist.run();
         }
         else if(command.compare("print") == 0)

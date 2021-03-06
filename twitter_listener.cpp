@@ -9,7 +9,6 @@ using json = nlohmann::json;
 
 twitter_listener::twitter_listener(const std::string bearerTokenString) : bearerToken(bearerTokenString)
 {
-
 }
 
 std::string twitter_listener::getRules()
@@ -22,8 +21,6 @@ std::string twitter_listener::getRules()
     std::string authStr = "Authorization: Bearer ";
     authStr = authStr + bearerToken;
 
-    std::string output;
-
     slist1 = curl_slist_append(slist1, authStr.c_str());
     curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream/rules");
@@ -33,15 +30,15 @@ std::string twitter_listener::getRules()
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &output);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string_handle);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     res = curl_easy_perform(curl);
     if (res != CURLE_OK)
     {
         fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
     }
 
-    return output;
+    return messageData;
 }
 
 
@@ -55,8 +52,7 @@ void twitter_listener::printRules()
         std::cout << std::endl;
         if(rule.contains("id"))
         {
-            std::cout << "Rule ID : " << rule["id"].dump() <<std::endl;
-            
+            std::cout << "Rule ID : " << rule["id"].dump() <<std::endl;          
         }
 
         if(rule.contains("value"))
@@ -66,19 +62,21 @@ void twitter_listener::printRules()
 
         if(rule.contains("tag"))
         {
-            std::cout << "Rule tag : " << rule["tag"].dump() <<std::endl;
-            
-        }
-        
+            std::cout << "Rule tag : " << rule["tag"].dump() <<std::endl;          
+        }   
     }
-
 }
 
-size_t twitter_listener::get_data_string(char *ptr, size_t size, size_t nmemb, void *userdata)
+size_t twitter_listener::get_data_string_impl(char *ptr, size_t size, size_t nmemb)
 {
-    ((std::string*)userdata)->append((char*)ptr, size * nmemb);
+    messageData.append((char*)ptr, size * nmemb);
 
     return size*nmemb;
+}
+
+size_t twitter_listener::get_data_string_handle(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    return static_cast<twitter_listener*>(userdata)->get_data_string_impl(ptr, size, nmemb);
 }
 
 void twitter_listener::addRule(const std::string newRuleValue, const std::string newRuleTag)
@@ -95,7 +93,6 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
 	if (curl)
 	{
         struct curl_slist *slist1;
-        std::string output;
 
         slist1 = NULL;
         slist1 = curl_slist_append(slist1, "Content-type: application/json");
@@ -111,8 +108,8 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
         curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
         curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &output);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string_handle);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
 		res = curl_easy_perform(curl);
 		if (res != CURLE_OK)
@@ -121,7 +118,7 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
 		}
         else
         {
-            auto outputJson = json::parse(output);
+            auto outputJson = json::parse(messageData);
 
             if(outputJson["meta"]["summary"]["created"] == 1)
             {
@@ -141,8 +138,6 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
                 std::cout << "Rule not created"<<std::endl;
             }
         }
-
-
 	}
 	curl_easy_cleanup(curl);
 }
@@ -170,7 +165,6 @@ void twitter_listener::removeRule(const std::string ruleTag)
             {
                 struct curl_slist *slist1;
                 json jsonrequest;
-                std::string output;
 
                 currentId.erase(std::remove(currentId.begin(), currentId.end(), '\"'), currentId.end());
 
@@ -195,8 +189,8 @@ void twitter_listener::removeRule(const std::string ruleTag)
                 curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
                 curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
                 curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string);
-                curl_easy_setopt(curl, CURLOPT_WRITEDATA, &output);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string_handle);
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
                 res = curl_easy_perform(curl);
                 if (res != CURLE_OK)
@@ -223,7 +217,6 @@ void twitter_listener::removeAllRules()
         if (curl)
         {
             struct curl_slist *slist1;
-            std::string output;
             json jsonrequest;
 
             currentId.erase(std::remove(currentId.begin(), currentId.end(), '\"'), currentId.end());
@@ -249,8 +242,8 @@ void twitter_listener::removeAllRules()
             curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
             curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &output);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::get_data_string_handle);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
             res = curl_easy_perform(curl);
             if (res != CURLE_OK)
@@ -262,28 +255,24 @@ void twitter_listener::removeAllRules()
     }
 }
 
-// ptr pointer to data
-// size is always 1
-// nmemb is the size of the data in ptr
-size_t twitter_listener::handle_tweet(char *ptr, size_t size, size_t nmemb, void *userdata)
+
+size_t twitter_listener::handle_tweet_impl(char *ptr, size_t size, size_t nmemb)
 {
     std::string message;
 
     for(int i = 0; i < nmemb; ++i) message.push_back(ptr[i]);
 
-    // handle empty message which is sent to keep connection open in case there are no new tweets
-    if(nmemb == 2) return 2;
-    auto tweet = json::parse(message);
-
-
-    for(int i = 0; i < tweet["matching_rules"].size(); ++i)
-    {
-        std::cout << tweet["matching_rules"][i]["tag"].dump() << std::endl;
-    }
-
-    
+    itsAMatch(message);
 
     return nmemb;
+}
+
+// ptr pointer to data
+// size is always 1
+// nmemb is the size of the data in ptr
+size_t twitter_listener::handle_tweet_handle(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    return static_cast<twitter_listener*>(userdata)->handle_tweet_impl(ptr, size, nmemb);
 }
 
 void twitter_listener::run()
@@ -305,10 +294,12 @@ void twitter_listener::run()
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::handle_tweet);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::handle_tweet_handle);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     res = curl_easy_perform(curl);
     if (res != CURLE_OK)
     {
         fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
     }
+    curl_easy_cleanup(curl);
 }
