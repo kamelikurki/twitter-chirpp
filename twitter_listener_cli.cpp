@@ -9,11 +9,11 @@ void printUsage()
     std::cout << "Possible arguments" << std::endl;
     std::cout << "---" << std::endl;
     std::cout << "clearall \"apiKey\"                       // removes all rules" << std::endl;
-    std::cout << "run \"apiKey\"                            // runs the listener" << std::endl;
-    std::cout << "print \"apiKey\"                          // prints all current rules" << std::endl;
-    std::cout << "remove \"apiKey\"                         // removes all rules" << std::endl;
-    std::cout << "add \"apiKey\"    \"rule\" \"tag\"            // Adds a new rule and adds a tag to it" << std::endl;
-    std::cout << "remove \"apiKey\"    \"tag\"                // removes a rule with the given tag" << std::endl;
+    std::cout << "run      \"apiKey\"                       // runs the listener" << std::endl;
+    std::cout << "print    \"apiKey\"                       // prints all current rules" << std::endl;
+    std::cout << "remove   \"apiKey\"                       // removes all rules" << std::endl;
+    std::cout << "add      \"rule\"   \"tag\"   \"apiKey\"      // Adds a new rule and adds a tag to it" << std::endl;
+    std::cout << "remove   \"tag\"    \"apiKey\"              // removes a rule with the given tag" << std::endl;
 
 }
 
@@ -26,8 +26,7 @@ void printMessage(std::string message)
 int main(int argc, const char* argv[] )
 {
     if(argc == 3)
-    {
-        
+    {       
         std::string command(argv[1]);
         twitter_listener tlist(argv[2]);
 
@@ -47,15 +46,13 @@ int main(int argc, const char* argv[] )
         else
         {
             printUsage();
-        }
-        
-
+        }       
     }
     else if(argc == 4)
     {
         std::string command(argv[1]);
-        twitter_listener tlist(argv[2]);
-        std::string tag(argv[3]);
+        twitter_listener tlist(argv[3]);
+        std::string tag(argv[2]);
 
         if(command.compare("remove") == 0)
         {
@@ -69,9 +66,9 @@ int main(int argc, const char* argv[] )
     else if(argc == 5)
     {
         std::string command(argv[1]);
-        twitter_listener tlist(argv[2]);
-        std::string value(argv[3]);
-        std::string tag(argv[4]);
+        twitter_listener tlist(argv[4]);
+        std::string value(argv[2]);
+        std::string tag(argv[3]);
 
         if(command.compare("add") == 0)
         {
