@@ -28,6 +28,34 @@
 				"isDefault": true
 			},
 			"detail": "compiler: /usr/bin/g++"
+		},
+		{
+			"type": "shell",
+			"label": "C/C++: g++ build static lib",
+			"command": "/usr/bin/g++",
+			"args": [
+				"-g",
+				"${file}",
+				"-o",
+				"${fileDirname}/${fileBasenameNoExtension}",
+				"twitter_listener.cpp",
+				"twitter_listener.hpp",
+				"-I../curl/include",
+				"-I/home/ville/projects/json/include",
+				"-L/usr/local/lib",
+				"-lcurl"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: /usr/bin/g++"
 		}
 	]
 }
