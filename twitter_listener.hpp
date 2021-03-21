@@ -8,11 +8,14 @@ public:
     twitter_listener(const std::string bearerTokenString);
 
     std::string getRules();
+    
     void addRule(const std::string newRuleValue, const std::string newRuleTag);
+    
     void removeRule(const std::string ruleTag);
+    
     void removeAllRules();
 
-    void run();
+    void run(const int reconnectDelaySeconds);
 
     void printRules();
 

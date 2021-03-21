@@ -8,9 +8,11 @@ include_directories("/home/ville/projects/json/include" "home/ville/projects/cur
 
 link_directories("/usr/local/lib")
 
-link_libraries("lcurl")
+link_libraries("curl")
 
 add_library(twitter_listener twitter_listener.hpp twitter_listener.cpp)
+
+add_executable(twitter_listener_cli twitter_listener_cli.cpp twitter_listener.hpp twitter_listener.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

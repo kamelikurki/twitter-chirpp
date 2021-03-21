@@ -4,6 +4,8 @@
 #include "curl/curl.h"
 #include <iostream>
 #include "twitter_listener.hpp"
+#include <chrono>
+#include <thread>
 
 using json = nlohmann::json;
 
@@ -267,15 +269,12 @@ size_t twitter_listener::handle_tweet_impl(char *ptr, size_t size, size_t nmemb)
     return nmemb;
 }
 
-// ptr pointer to data
-// size is always 1
-// nmemb is the size of the data in ptr
 size_t twitter_listener::handle_tweet_handle(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     return static_cast<twitter_listener*>(userdata)->handle_tweet_impl(ptr, size, nmemb);
 }
 
-void twitter_listener::run()
+void twitter_listener::run(const int reconnectDelaySeconds = 300)
 {
 	CURLcode res;
     CURL *curl = curl_easy_init();
@@ -296,10 +295,21 @@ void twitter_listener::run()
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::handle_tweet_handle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-    res = curl_easy_perform(curl);
-    if (res != CURLE_OK)
+
+    auto failCount = 0;
+
+    auto previousTime = std::chrono::system_clock::now();
+
+    while(1)
     {
-        fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
+        res = curl_easy_perform(curl);
+        if (res != CURLE_OK)
+        {
+            fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
+
+            std::this_thread::sleep_for(std::chrono::minutes(reconnectDelaySeconds));
+        }
     }
+
     curl_easy_cleanup(curl);
 }
