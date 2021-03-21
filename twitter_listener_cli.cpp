@@ -37,7 +37,7 @@ int main(int argc, const char* argv[] )
         else if(command.compare("run") == 0)
         {
             tlist.itsAMatch = [] (std::string msg) {printMessage(msg);};
-            tlist.run();
+            tlist.run(std::cout);
         }
         else if(command.compare("print") == 0)
         {

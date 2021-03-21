@@ -47,7 +47,7 @@ public:
       Creates a connection to the twitter streaming API and calls itsAMatch function every time a tweet matching the defined rules is found. 
     \param reconnectDelaySeconds 
     */
-    void run(const int reconnectDelaySeconds = 300);
+    void run(std::ostream& infoDestination, const int reconnectDelaySeconds = 300);
 
     //! Function variable
     /*!    

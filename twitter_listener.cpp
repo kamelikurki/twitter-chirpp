@@ -274,7 +274,7 @@ size_t twitter_listener::handle_tweet_handle(char *ptr, size_t size, size_t nmem
     return static_cast<twitter_listener*>(userdata)->handle_tweet_impl(ptr, size, nmemb);
 }
 
-void twitter_listener::run(const int reconnectDelaySeconds)
+void twitter_listener::run(std::ostream& logDestination, const int reconnectDelaySeconds)
 {
 	CURLcode res;
     CURL *curl = curl_easy_init();
@@ -305,8 +305,7 @@ void twitter_listener::run(const int reconnectDelaySeconds)
         res = curl_easy_perform(curl);
         if (res != CURLE_OK)
         {
-            fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
-
+            logDestination << "curl_easy_operation() failed : %s\n" << curl_easy_strerror(res);
             std::this_thread::sleep_for(std::chrono::minutes(reconnectDelaySeconds));
         }
     }
