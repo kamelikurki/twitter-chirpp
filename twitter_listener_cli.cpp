@@ -41,7 +41,7 @@ int main(int argc, const char* argv[] )
         }
         else if(command.compare("print") == 0)
         {
-            tlist.printRules();
+            tlist.printRules(std::cout);
         }
         else
         {

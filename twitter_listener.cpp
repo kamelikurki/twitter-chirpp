@@ -44,7 +44,7 @@ std::string twitter_listener::getRules()
 }
 
 
-void twitter_listener::printRules()
+void twitter_listener::printRules(std::ostream& printDestination)
 {
     auto rules = getRules();
     auto rulesJSON = json::parse(rules);
@@ -54,17 +54,17 @@ void twitter_listener::printRules()
         std::cout << std::endl;
         if(rule.contains("id"))
         {
-            std::cout << "Rule ID : " << rule["id"].dump() <<std::endl;          
+            printDestination << "Rule ID : " << rule["id"].dump() << std::endl;          
         }
 
         if(rule.contains("value"))
         {
-            std::cout << "Rule value : " << rule["value"].dump() <<std::endl;
+            printDestination << "Rule value : " << rule["value"].dump() << std::endl;
         }
 
         if(rule.contains("tag"))
         {
-            std::cout << "Rule tag : " << rule["tag"].dump() <<std::endl;          
+            printDestination << "Rule tag : " << rule["tag"].dump() << std::endl;          
         }   
     }
 }
