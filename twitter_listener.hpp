@@ -15,7 +15,7 @@ public:
     
     void removeAllRules();
 
-    void run(const int reconnectDelaySeconds);
+    void run(const int reconnectDelaySeconds = 300);
 
     void printRules();
 

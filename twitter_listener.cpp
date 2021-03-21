@@ -274,7 +274,7 @@ size_t twitter_listener::handle_tweet_handle(char *ptr, size_t size, size_t nmem
     return static_cast<twitter_listener*>(userdata)->handle_tweet_impl(ptr, size, nmemb);
 }
 
-void twitter_listener::run(const int reconnectDelaySeconds = 300)
+void twitter_listener::run(const int reconnectDelaySeconds)
 {
 	CURLcode res;
     CURL *curl = curl_easy_init();
