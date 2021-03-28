@@ -1,5 +1,9 @@
 #include "twitter_listener.hpp"
 #include <iostream>
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
+
 
 void printUsage()
 {
@@ -17,10 +21,24 @@ void printUsage()
 
 }
 
-
-void printMessage(std::string message)
+void printMessage(std::string message, long statuscode)
 {
-    std::cout << message << std::endl;
+    if(statuscode == 200)
+    {
+        std::cout << message << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed connection with code " << statuscode <<  std::endl;
+
+
+        // Parse error from message 
+
+        auto message_json = json::parse(message);
+        std::cout << message_json["title"].dump() <<  std::endl;
+        std::cout << message_json["detail"].dump() <<  std::endl;
+    }
+    
 }
 
 int main(int argc, const char* argv[] )
@@ -36,7 +54,7 @@ int main(int argc, const char* argv[] )
         }
         else if(command.compare("run") == 0)
         {
-            tlist.itsAMatch = [] (std::string msg) {printMessage(msg);};
+            tlist.itsAMatch = [] (std::string msg, long ec) {printMessage(msg, ec);};
             tlist.run(std::cout);
         }
         else if(command.compare("print") == 0)

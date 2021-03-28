@@ -1,5 +1,6 @@
 #include <string>
 #include <functional>
+#include "curl/curl.h"
 
 class twitter_listener
 {
@@ -11,6 +12,13 @@ public:
       \param bearerTokenString bearer token for authenticating
     */
     twitter_listener(const std::string bearerTokenString);
+
+    //! Destructor
+    /*!
+      Destructs a  twitter listener object
+      \param bearerTokenString bearer token for authenticating
+    */
+    ~twitter_listener();
 
     //! Function returning all currently active rules
     /*!
@@ -49,16 +57,19 @@ public:
     */
     void run(std::ostream& infoDestination, const int reconnectDelaySeconds = 300);
 
+    static size_t print_header(char* ptr, size_t size, size_t nitems, void *userdata) ;
+
     //! Function variable
     /*!    
       A function which returns void and takes string as an argument. 
     */
-    std::function<void(std::string)> itsAMatch;
+    std::function<void(std::string, long)> itsAMatch;
 
 private:
 
     const std::string bearerToken; /**< bearer token used for authentication purposes */
-    std::string messageData;       /**< variable to hold message data returned by the endpoint*/
+    std::string messageData;       /**< variable to hold message data returned by the endpoint */
+    CURL* curl;                    /**< curl object */
 
     //! Handle to a function which handles a tweet
     /*!    

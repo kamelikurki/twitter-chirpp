@@ -1,7 +1,7 @@
 
 
 #include "nlohmann/json.hpp"
-#include "curl/curl.h"
+
 #include <iostream>
 #include "twitter_listener.hpp"
 #include <chrono>
@@ -11,12 +11,17 @@ using json = nlohmann::json;
 
 twitter_listener::twitter_listener(const std::string bearerTokenString) : bearerToken(bearerTokenString)
 {
+    curl = curl_easy_init();
+}
+
+twitter_listener::~twitter_listener()
+{
+    curl_easy_cleanup(curl);
 }
 
 std::string twitter_listener::getRules()
 {
     CURLcode res;
-    CURL *curl = curl_easy_init();
     struct curl_slist *slist1;
     slist1 = NULL;
 
@@ -24,6 +29,7 @@ std::string twitter_listener::getRules()
     authStr = authStr + bearerToken;
 
     slist1 = curl_slist_append(slist1, authStr.c_str());
+    curl_easy_reset(curl);
     curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream/rules");
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
@@ -90,7 +96,6 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
     add["add"].push_back(value);
     auto vals = add.dump();
 
-    CURL *curl = curl_easy_init();
 	CURLcode res;
 	if (curl)
 	{
@@ -99,6 +104,8 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
         slist1 = NULL;
         slist1 = curl_slist_append(slist1, "Content-type: application/json");
         slist1 = curl_slist_append(slist1, "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAAI5SMgEAAAAAt3aJSeyQuDBqcGGiKPD81jbSS7k%3DeaNMIbJ3GxWWqFhkxdl2ld7A4QezpdW6iKY4DgMhbyHH2Ocuww");
+
+        curl_easy_reset(curl);
 
         curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
         curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream/rules");
@@ -141,7 +148,6 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
             }
         }
 	}
-	curl_easy_cleanup(curl);
 }
 
 
@@ -161,7 +167,7 @@ void twitter_listener::removeRule(const std::string ruleTag)
         if(currentTag.compare(ruleTag) == 0)
         {
             auto currentId = rulesJson["data"][i]["id"].dump();
-            CURL *curl = curl_easy_init();
+            curl = curl_easy_init();
             CURLcode res;
             if (curl)
             {
@@ -180,7 +186,7 @@ void twitter_listener::removeRule(const std::string ruleTag)
                 std::string authStr = "Authorization: Bearer ";
                 authStr = authStr + bearerToken;
                 slist1 = curl_slist_append(slist1, authStr.c_str());
-
+                curl_easy_reset(curl);
                 curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
                 curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream/rules");
                 curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
@@ -200,7 +206,6 @@ void twitter_listener::removeRule(const std::string ruleTag)
                     fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
                 }
             }
-            curl_easy_cleanup(curl);
         }
     }
 }
@@ -214,7 +219,7 @@ void twitter_listener::removeAllRules()
     for(int i = 0; i < rulesJson["data"].size(); ++i)
     {
         auto currentId = rulesJson["data"][i]["id"].dump();
-        CURL *curl = curl_easy_init();
+        curl = curl_easy_init();
         CURLcode res;
         if (curl)
         {
@@ -234,6 +239,7 @@ void twitter_listener::removeAllRules()
             authStr = authStr + bearerToken;
             slist1 = curl_slist_append(slist1, authStr.c_str());
 
+            curl_easy_reset(curl);
             curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
             curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream/rules");
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
@@ -253,18 +259,21 @@ void twitter_listener::removeAllRules()
                 fprintf(stderr, "curl_easy_operation() failed : %s\n", curl_easy_strerror(res));
             }
         }
-        curl_easy_cleanup(curl);
     }
 }
 
 
 size_t twitter_listener::handle_tweet_impl(char *ptr, size_t size, size_t nmemb)
 {
+
+    long response_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
     std::string message;
 
     for(int i = 0; i < nmemb; ++i) message.push_back(ptr[i]);
 
-    itsAMatch(message);
+    itsAMatch(message, response_code);
 
     return nmemb;
 }
@@ -274,10 +283,22 @@ size_t twitter_listener::handle_tweet_handle(char *ptr, size_t size, size_t nmem
     return static_cast<twitter_listener*>(userdata)->handle_tweet_impl(ptr, size, nmemb);
 }
 
+
+size_t twitter_listener::print_header(char* ptr, size_t size, size_t nitems, void *userdata) {
+    size_t numbytes = size * nitems;
+
+    std::string toPrint;
+    toPrint.append((char*)ptr, numbytes);
+
+    std::cout << toPrint << std::endl;
+
+    return numbytes;
+}
+
 void twitter_listener::run(std::ostream& logDestination, const int reconnectDelaySeconds)
 {
 	CURLcode res;
-    CURL *curl = curl_easy_init();
+    
     struct curl_slist *slist1;
     slist1 = NULL;
 
@@ -285,6 +306,8 @@ void twitter_listener::run(std::ostream& logDestination, const int reconnectDela
     authStr = authStr + bearerToken;
 
     slist1 = curl_slist_append(slist1, authStr.c_str());
+
+    curl_easy_reset(curl);
     curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream");
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
@@ -296,19 +319,13 @@ void twitter_listener::run(std::ostream& logDestination, const int reconnectDela
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, twitter_listener::handle_tweet_handle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
-    auto failCount = 0;
-
-    auto previousTime = std::chrono::system_clock::now();
-
-    while(1)
+    res = curl_easy_perform(curl);
+    if (res != CURLE_OK)
     {
-        res = curl_easy_perform(curl);
-        if (res != CURLE_OK)
-        {
-            logDestination << "curl_easy_operation() failed : %s\n" << curl_easy_strerror(res);
-            std::this_thread::sleep_for(std::chrono::minutes(reconnectDelaySeconds));
-        }
+        logDestination << "curl_easy_operation() failed : %s\n" << curl_easy_strerror(res);
     }
-
-    curl_easy_cleanup(curl);
+    else
+    {
+          
+    }
 }
