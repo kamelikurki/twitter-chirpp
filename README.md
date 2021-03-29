@@ -4,7 +4,7 @@ A simple c++ library for using the Twitter streaming API. It makes it possible t
 
 To use the twitter API, a registration at https://developer.twitter.com/ is needed. After being accepted to the twitter developer program the Bearer Token this twitter-listener needs for authenticating with the API will be available.
 
-## Create a new instance of the api 
+## Create a new instance of the listener 
 
 
 ```cpp
