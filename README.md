@@ -22,7 +22,7 @@ twitter_listener t_listener(apiKey, std::cout);
 
 ```
 
-Twitter listener takes two arguments, the API key and stream where to write possible output and error messages. Use standard output, a file or whatever you want. 
+Twitter listener takes two arguments, the API key and stream where to write possible output and error messages. Use standard output, a file or whatever is wanted. 
 
 
 ## Create a new rule 
@@ -32,6 +32,28 @@ t_listener.addRule("Rule value", "Rule tag");
 
 ```
 
+Adding a rule takes two arguments. First, a rule string. Instructions for creating the string are here: https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query . The tag value is used to identify the tweets when removing rules. The tag value is also returned as a part of the matching tweet. 
+
+
+## Remove a rule
+```cpp
+t_listener.removeRule("Rule tag");
+
+```
+Rule can be removed by giving it's tag to the removeRule function. 
 
 
 
+## Print existing rules
+```cpp
+t_listener.printRules();
+
+```
+Prints all rules to the stream given in the constructor. 
+
+## Remove all rules
+```cpp
+t_listener.removeAllRules();
+
+```
+Removes all rules from the API
