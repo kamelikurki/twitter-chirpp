@@ -6,17 +6,21 @@ To use the twitter API, a registration at https://developer.twitter.com/ is need
 
 ## Dependencies
 
-The listener is using [CURL](https://curl.se/) to manage the connections to the twitter API endpoints. Installation instructions can be found here: https://curl.se/docs/install.html . 
+The listener is using [CURL](https://curl.se/) to manage the connections to the twitter API endpoints. Installation instructions can be found here: https://curl.se/docs/install.html . The curl needs to be installed with the option --with-ssl . 
 
 ## Building the library on linux
 
 ### Cmake
 
-The project has Cmake files included and can be built using them.
+The project has Cmake files included and can be built using them. In the project directory:
 
-### VS Code
+``` shell
+mkdir build
+cd build 
+cmake ..
+make
 
-The project has also VS code settings files included
+```
 
 ## Building on Windows or OSX
 
