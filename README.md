@@ -4,6 +4,25 @@ A simple c++ library for using the Twitter streaming API. It makes it possible t
 
 To use the twitter API, a registration at https://developer.twitter.com/ is needed. After being accepted to the twitter developer program the Bearer Token this twitter-listener needs for authenticating with the API will be available.
 
+## Dependencies
+
+The listener is using [CURL](https://curl.se/) to manage the connections to the twitter API endpoints. Installation instructions can be found here: https://curl.se/docs/install.html . 
+
+## Building the library on linux
+
+### Cmake
+
+The project has Cmake files included and can be built using them.
+
+### VS Code
+
+The project has also VS code settings files included
+
+## Building on Windows or OSX
+
+These options haven't been tested but Cmake should work on them as well.
+
+
 ## Create a new instance of the listener 
 
 
