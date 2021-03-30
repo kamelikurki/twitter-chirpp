@@ -324,8 +324,4 @@ void twitter_listener::run(std::ostream& logDestination, const int reconnectDela
     {
         logDestination << "curl_easy_operation() failed : %s\n" << curl_easy_strerror(res);
     }
-    else
-    {
-          
-    }
 }

@@ -61,7 +61,7 @@ public:
 
     //! Function variable
     /*!    
-      A function which returns void and takes string as an argument. 
+      A function which returns void and takes string and a long as arguments. 
     */
     std::function<void(std::string, long)> itsAMatch;
 
