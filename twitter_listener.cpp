@@ -1,11 +1,6 @@
-
-
 #include "nlohmann/json.hpp"
-
 #include <iostream>
 #include "twitter_listener.hpp"
-#include <chrono>
-#include <thread>
 
 using json = nlohmann::json;
 
@@ -33,7 +28,6 @@ std::string twitter_listener::getRules()
     curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream/rules");
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.55.1");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
@@ -112,7 +106,6 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, vals.c_str());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)vals.length());
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.55.1");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
         curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
@@ -192,7 +185,6 @@ void twitter_listener::removeRule(const std::string ruleTag)
                 curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonrequeststr.c_str());
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)jsonrequeststr.length());
-                curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.55.1");
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
                 curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
                 curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
@@ -245,7 +237,6 @@ void twitter_listener::removeAllRules()
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonrequeststr.c_str());
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)jsonrequeststr.length());
-            curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.55.1");
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
             curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
@@ -283,18 +274,6 @@ size_t twitter_listener::handle_tweet_handle(char *ptr, size_t size, size_t nmem
     return static_cast<twitter_listener*>(userdata)->handle_tweet_impl(ptr, size, nmemb);
 }
 
-
-size_t twitter_listener::print_header(char* ptr, size_t size, size_t nitems, void *userdata) {
-    size_t numbytes = size * nitems;
-
-    std::string toPrint;
-    toPrint.append((char*)ptr, numbytes);
-
-    std::cout << toPrint << std::endl;
-
-    return numbytes;
-}
-
 void twitter_listener::run(std::ostream& logDestination, const int reconnectDelaySeconds)
 {
 	CURLcode res;
@@ -311,7 +290,6 @@ void twitter_listener::run(std::ostream& logDestination, const int reconnectDela
     curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.twitter.com/2/tweets/search/stream");
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.55.1");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
