@@ -95,10 +95,6 @@ void twitter_listener::addRule(const std::string newRuleValue, const std::string
 	{
         struct curl_slist *slist1;
 
-        slist1 = NULL;
-        slist1 = curl_slist_append(slist1, "Content-type: application/json");
-        slist1 = curl_slist_append(slist1, "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAAI5SMgEAAAAAt3aJSeyQuDBqcGGiKPD81jbSS7k%3DeaNMIbJ3GxWWqFhkxdl2ld7A4QezpdW6iKY4DgMhbyHH2Ocuww");
-
         curl_easy_reset(curl);
 
         curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
