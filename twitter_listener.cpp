@@ -54,17 +54,17 @@ void twitter_listener::printRules(std::ostream& printDestination)
         std::cout << std::endl;
         if(rule.contains("id"))
         {
-            printDestination << "Rule ID : " << rule["id"].dump() << std::endl;          
+            printDestination << "Rule ID: " << rule["id"].dump() << std::endl;          
         }
 
         if(rule.contains("value"))
         {
-            printDestination << "Rule value : " << rule["value"].dump() << std::endl;
+            printDestination << "Rule value: " << rule["value"].dump() << std::endl;
         }
 
         if(rule.contains("tag"))
         {
-            printDestination << "Rule tag : " << rule["tag"].dump() << std::endl;          
+            printDestination << "Rule tag: " << rule["tag"].dump() << std::endl;          
         }   
     }
 }
